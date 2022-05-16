@@ -1,31 +1,14 @@
 package com.smproject.yourcityradio;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
-
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
-    //
-//    static ImageView playStopButton;
-//    static ImageView play;
+    static ImageView playPouseButton;
 //    static TextView title;
 //
 //    NotificationManager notificationManager;
@@ -61,6 +44,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        playPouseButton = findViewById(R.id.btn_play);
+        playPouseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Player.player.togglePlayer();
+            }
+        });
+
+
         String url = "https://c34.radioboss.fm:18234/stream";
 
         if (Player.player == null) {
@@ -69,22 +61,15 @@ public class MainActivity extends AppCompatActivity {
 
         Player.player.playStream(url);
 
+    }
 
-//        play = findViewById(R.id.btn_play);
-//        play.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (mServiceBound) {
-//                    mBoundService.togglePlayer();
-//                }
-//            }
-//        });
-//
-//        if (Player.player == null)
-//            new Player();
-//
-//        Player.player.playStream(url);
-////        startStreamingService();
+    public static void flipPlayPauseButton(boolean isPlaying) {
+        if (isPlaying) {
+            playPouseButton.setImageResource(R.drawable.ic_pause_button);
+        } else {
+            playPouseButton.setImageResource(R.drawable.ic_play_button);
+
+        }
     }
 
 //    private void startStreamingService() {
