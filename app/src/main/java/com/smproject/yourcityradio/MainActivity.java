@@ -97,18 +97,19 @@ public class MainActivity extends AppCompatActivity {
     private void startStreamingService(String url) {
         Intent i = new Intent(this, PlayerService.class);
         i.putExtra("url", url);
+        i.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
         startService(i);
         bindService(i, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mServiseBound) {
-            unbindService(mServiceConnection);
-            mServiseBound = false;
-        }
-    }
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        if (mServiseBound) {
+//            unbindService(mServiceConnection);
+//            mServiseBound = false;
+//        }
+//    }
 
     @Override
     protected void onResume() {
@@ -136,42 +137,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private void startStreamingService() {
-//        Intent intent = new Intent(this, PlayerService.class);
-//        intent.putExtra("url", url);
-////        intent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
-//        startService(intent);
-////        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-//    }
-//
-//
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("changePlayButton"));
-//    }
-//
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-//    }
-//
-//
-//    public static void flipPlayPauseButton(boolean isPlaying) {
-//        if (isPlaying) {
-//            play.setImageResource(R.drawable.ic_pause_button);
-//        } else {
-//            play.setImageResource(R.drawable.ic_play_button);
-//        }
-//    }
-//
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        if (mServiceBound) {
-//            unbindService(mServiceConnection);
-//            mServiceBound = false;
-//        }
-//    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        super.onStop();
+        if (mServiseBound) {
+            unbindService(mServiceConnection);
+            mServiseBound = false;
+        }
+    }
 }
