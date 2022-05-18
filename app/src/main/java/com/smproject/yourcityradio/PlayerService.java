@@ -3,16 +3,20 @@ package com.smproject.yourcityradio;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.IOException;
@@ -38,7 +42,9 @@ public class PlayerService extends Service {
         }
         if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION)) {
             Log.i("infoo", "Start foreground service");
-//            showNotification();
+
+//            createNotification(getApplicationContext(), 1);
+//            showNotification(getApplicationContext());
         } else if (intent.getAction().equals(Constants.ACTION.PREV_ACTION)) {
             Log.i("infoo", "Prev pressed");
         } else if (intent.getAction().equals(Constants.ACTION.PLAY_ACTION)) {
@@ -54,57 +60,135 @@ public class PlayerService extends Service {
         return START_REDELIVER_INTENT;
     }
 
-    private void showNotification() {
-        Intent notificationIntent = new Intent(this, PlayerService.class);
-        notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                notificationIntent,
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    public static void createNotification(Context context, int playbutton) {
 
-        Intent prevIntent = new Intent(this, PlayerService.class);
-        notificationIntent.setAction(Constants.ACTION.PREV_ACTION);
-        PendingIntent pprevIntent = PendingIntent.getActivity(
-                this,
-                0,
-                prevIntent,
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-        Intent playIntent = new Intent(this, PlayerService.class);
-        notificationIntent.setAction(Constants.ACTION.PLAY_ACTION);
-        PendingIntent pplayIntent = PendingIntent.getActivity(
-                this,
-                0,
-                playIntent,
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
+            MediaSessionCompat mediaSessionCompat = new MediaSessionCompat(context, "tag");
 
-        Intent nextIntent = new Intent(this, PlayerService.class);
-        notificationIntent.setAction(Constants.ACTION.NEXT_ACTION);
-        PendingIntent pnextIntent = PendingIntent.getActivity(
-                this,
-                0,
-                nextIntent,
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.t1);
 
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.t1);
 
-        Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle("Music player")
-                .setTicker("Playing music")
-                .setContentText("My song")
+            Intent intentPrevious = new Intent(context, PlayerService.class)
+                    .setAction(Constants.ACTION.PREV_ACTION);
+            PendingIntent pendingIntentPrevious = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    intentPrevious,
+                    PendingIntent.FLAG_IMMUTABLE |PendingIntent.FLAG_UPDATE_CURRENT);
+
+            int drw_previous = R.drawable.ic_skip_previous_black_24dp;
+
+
+            Intent intentPlay = new Intent(context, PlayerService.class)
+                    .setAction(Constants.ACTION.MAIN_ACTION);
+            PendingIntent pendingIntentPlay = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    intentPlay,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+                Intent intentNext = new Intent(context, PlayerService.class)
+                        .setAction(Constants.ACTION.NEXT_ACTION);
+            PendingIntent pendingIntentNext = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                        intentNext,
+                    PendingIntent.FLAG_IMMUTABLE |PendingIntent.FLAG_UPDATE_CURRENT);
+               int  drw_next = R.drawable.ic_skip_next_black_24dp;
+
+            String CHANNEL_ID = "channel1";
+
+            //create notification
+            Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_music_note)
+                    .setContentTitle("track.getTitle()")
+                    .setContentText("track.getArtist()")
+                    .setLargeIcon(icon)
+                    .setOnlyAlertOnce(true)//show notification for only first time
+                    .setShowWhen(false)
+                    .addAction(R.drawable.ic_play_button_dark, "Previous", pendingIntentPrevious)
+                    .addAction(playbutton, "Play", pendingIntentPlay)
+                    .addAction(R.drawable.ic_play_button_dark, "Next", pendingIntentNext)
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText("Much longer text that cannot fit one line..."))
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .build();
+
+            notificationManagerCompat.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, notification);
+
+        }
+    }
+
+    private void showMyNotification() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_music_note)
-                .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
-                .setContentIntent(pendingIntent)
-                .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_previous, "Previous", pprevIntent)
-                .addAction(android.R.drawable.ic_media_play, "Play", pplayIntent)
-                .addAction(android.R.drawable.ic_media_next, "Next", pnextIntent)
-                .build();
+                .setContentTitle("Your City Radio")
+                .setContentText("Playing")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText("Some text"))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, notification);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, builder.build());
 
+
+    }
+
+    private void showNotification(Context context) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            Intent notificationIntent = new Intent(context, PlayerService.class);
+            notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
+//        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    context,
+                    0,
+                    notificationIntent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Intent prevIntent = new Intent(context, PlayerService.class);
+            notificationIntent.setAction(Constants.ACTION.PREV_ACTION);
+            PendingIntent pprevIntent = PendingIntent.getActivity(
+                    context,
+                    0,
+                    prevIntent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Intent playIntent = new Intent(context, PlayerService.class);
+            notificationIntent.setAction(Constants.ACTION.PLAY_ACTION);
+            PendingIntent pplayIntent = PendingIntent.getActivity(
+                    context,
+                    0,
+                    playIntent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Intent nextIntent = new Intent(context, PlayerService.class);
+            notificationIntent.setAction(Constants.ACTION.NEXT_ACTION);
+            PendingIntent pnextIntent = PendingIntent.getActivity(
+                    context,
+                    0,
+                    nextIntent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+//        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.t1);
+
+            Notification notification = new NotificationCompat.Builder(context)
+                    .setContentTitle("Music player")
+                    .setTicker("Playing music")
+                    .setContentText("My song")
+                    .setSmallIcon(R.drawable.ic_music_note)
+//                .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
+                    .setContentIntent(pendingIntent)
+                    .setOngoing(true)
+//                .addAction(android.R.drawable.ic_media_previous, "Previous", pprevIntent)
+                    .addAction(android.R.drawable.ic_media_play, "Play", pplayIntent)
+//                .addAction(android.R.drawable.ic_media_next, "Next", pnextIntent)
+                    .build();
+
+            startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, notification);
+        }
 
     }
 

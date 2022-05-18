@@ -9,16 +9,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     static ImageView playPouseButton;
     PlayerService mBoundService;
     boolean mServiseBound = false;
+    TextView homeLink;
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -42,37 +45,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-
-//    static TextView title;
-//
-//    NotificationManager notificationManager;
-//    boolean mServiceBound = false;
-//    PlayerService mBoundService;
-//
-//
-//    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            boolean isPlaying = intent.getBooleanExtra("isPlaying", false);
-//            flipPlayPauseButton(isPlaying);
-//        }
-//    };
-//
-//    private ServiceConnection mServiceConnection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName componentName, IBinder service) {
-//            PlayerService.MyBinder myBinder = (PlayerService.MyBinder) service;
-//            mBoundService = myBinder.getService();
-//            mServiceBound = true;
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName componentName) {
-//            mServiceBound = false;
-//
-//        }
-//    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,9 +61,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        homeLink = findViewById(R.id.txt_homeLink);
+        homeLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://yourcityradio.com/"));
+                startActivity(browserIntent);
+            }
+        });
 
         startStreamingService(url);
-
     }
 
     private void startStreamingService(String url) {
@@ -132,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         if (isPlaying) {
             playPouseButton.setImageResource(R.drawable.ic_pause_button);
         } else {
-            playPouseButton.setImageResource(R.drawable.ic_play_button);
+            playPouseButton.setImageResource(R.drawable.ic_play_button_dark);
 
         }
     }
