@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         startStreamingService(url);
+        
     }
 
     private void startStreamingService(String url) {

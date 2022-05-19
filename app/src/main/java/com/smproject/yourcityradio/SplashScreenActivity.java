@@ -17,8 +17,6 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         new Handler().postDelayed(new Runnable() {
 
-// Using handler with postDelayed called runnable run method
-
             @Override
 
             public void run() {
@@ -33,7 +31,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
             }
 
-        }, 3000); // wait for 5 seconds
+        }, 5000); // wait for 5 seconds
 
 
     }
